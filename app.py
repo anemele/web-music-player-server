@@ -37,4 +37,4 @@ def get_music(music: str):
 
 if __name__ == '__main__':
     host = socket.gethostbyname(socket.gethostname())
-    app.run(host=host, debug=False)
+    app.run(host=host, debug=True)
