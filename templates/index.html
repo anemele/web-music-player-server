@@ -6,10 +6,17 @@
     <title>{{title}}</title>
     <link rel="shortcut icon" href="{{ url_for('static', filename='./img/favicon.ico') }}">
     <style>
-        div.player {
+        #title,
+        div.player,
+        div.next {
             display: flex;
             justify-content: center;
             align-items: center;
+        }
+
+        #next {
+            font-weight: bold;
+            font-size: x-large;
         }
     </style>
     <script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
@@ -22,11 +29,13 @@
             <audio src="{{src}}" controls autoplay></audio>
         </div>
     </div>
+    <br>
+    <div class="next"><button id="next">next</button></div>
 </body>
 
 <script>
     const audio = document.querySelector('audio')
-    audio.onended = function () {
+    function next() {
         $.ajax({
             url: '/random', method: 'GET',
             success: function (res) {
@@ -37,6 +46,8 @@
             error: function (err) { alert(err) }
         })
     }
+    audio.onended = next
+    $('#next').on('click', next)
 </script>
 
 </html>
