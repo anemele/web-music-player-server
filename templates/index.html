@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{music}}</title>
+    <title>{{title}}</title>
     <style>
         div.player {
             display: flex;
@@ -11,21 +11,30 @@
             align-items: center;
         }
     </style>
+    <script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
 </head>
 
 <body>
     <div>
-        <h2>{{music}}</h2>
+        <h2 id="title">{{title}}</h2>
         <div class="player">
-            <audio src="/music/{{music}}" controls autoplay></audio>
+            <audio src="{{src}}" controls autoplay></audio>
         </div>
-        <h2><a id="next" href="{{next.id}}">{{next.name}}</a></h2>
     </div>
 </body>
 
 <script>
-    document.querySelector('audio').onended = function(){
-        document.getElementById('next').click()
+    const audio = document.querySelector('audio')
+    audio.onended = function () {
+        $.ajax({
+            url: '/random', method: 'GET',
+            success: function (res) {
+                audio.src = '/music/' + res
+                $('head > title').text(res)
+                $('#title').text(res)
+            },
+            error: function (err) { alert(err) }
+        })
     }
 </script>
 
