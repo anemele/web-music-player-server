@@ -1,0 +1,32 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{music}}</title>
+    <style>
+        div.player {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+        <h2>{{music}}</h2>
+        <div class="player">
+            <audio src="/music/{{music}}" controls autoplay></audio>
+        </div>
+        <h2><a id="next" href="{{next.id}}">{{next.name}}</a></h2>
+    </div>
+</body>
+
+<script>
+    document.querySelector('audio').onended = function(){
+        document.getElementById('next').click()
+    }
+</script>
+
+</html>
