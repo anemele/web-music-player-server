@@ -1,0 +1,1 @@
+@%PYTHON_VENV_PATH%\flask\Scripts\python.exe app.py

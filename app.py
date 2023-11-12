@@ -58,4 +58,4 @@ def get_random():
 
 if __name__ == '__main__':
     host = socket.gethostbyname(socket.gethostname())
-    app.run(host=host, debug=True)
+    app.run(host=host, debug=False)
