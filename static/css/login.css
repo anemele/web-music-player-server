@@ -11,13 +11,12 @@ body {
     align-items: center;
     justify-content: center;
     background: fixed no-repeat;
-    background-color: #5555;
+    background-color: #6666;
     background-size: cover;
 }
 
 .login-form {
     width: 240px;
-    height: 220px;
     display: flex;
     flex-direction: column;
     padding: 40px;
@@ -27,17 +26,10 @@ body {
     background: inherit;
     border-radius: 18px;
     overflow: hidden;
-    /* 隐藏多余的模糊效果*/
+    /* 隐藏多余的模糊效果 */
 }
 
-.login-form h2 {
-    font-size: 18px;
-    font-weight: 400;
-    color: #3d5245;
-}
-
-.login-form input,
-.login-form button {
+.login-form input {
     margin: 6px 0;
     height: 36px;
     border: none;
