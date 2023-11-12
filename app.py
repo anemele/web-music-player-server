@@ -55,9 +55,9 @@ def get_music(id: int):
 
 @app.route('/random')
 def get_random():
-    return str(random.randrange(LENGTH))
+    return str(ITEMS[random.randrange(LENGTH)]['id'])
 
 
 if __name__ == '__main__':
     host = socket.gethostbyname(socket.gethostname())
-    app.run(host=host, debug=False)
+    app.run(host=host, debug=True)

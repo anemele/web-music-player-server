@@ -16,18 +16,20 @@ $(document).ready(function () {
             url: '/random', method: 'GET',
             success: function (res) {
                 audio.src = '/music/' + res
-                changeCurrent($('.item')[res])
+                changeCurrent($(`.item[uid=${res}]`))
                 locateCurrent()
             },
-            error: function (err) { if (err) alert(err.message) }
+            error: function (err) { if (err) alert(err) }
         })
     }
 
     $('.item').each(function (_, item) {
         $(item, '.content').on('click', function () {
-            let id = $(this).attr('id')
+            if ($(this).attr('id') === 'current') { return }
+            let id = $(this).attr('uid')
             audio.src = '/music/' + id
             changeCurrent(item)
+            if (audio.paused) { audio.paused = false; audio.play() }
         })
     })
 
