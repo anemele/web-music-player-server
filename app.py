@@ -3,10 +3,16 @@ import socket
 from itertools import chain, starmap
 from pathlib import Path
 
-from flask import Flask, render_template, send_file
+from flask import Flask, redirect, render_template, request, send_file
 from tinytag import TinyTag
 
 app = Flask(__name__)
+
+LOGIN: bool = False
+PASSWORD = None
+_PWD_PATH = Path('./pwd.txt')
+if _PWD_PATH.exists():
+    PASSWORD = _PWD_PATH.read_text().strip()
 
 
 def find_music(root: Path, *ext):
@@ -40,10 +46,33 @@ LENGTH = len(ITEMS)
 
 @app.route('/')
 def index():
+    global LOGIN
+    if PASSWORD is not None and not LOGIN:
+        return redirect('/login')
+    LOGIN = False
+
     items = ITEMS.copy()
     random.shuffle(items)
     data = dict(items=items)
     return render_template('index.html', **data)
+
+
+@app.route('/login')
+def get_login():
+    return render_template('login.html')
+
+
+@app.route('/login', methods=['POST'])
+def post_login():
+    global LOGIN
+    # print(request.form) # POST
+    # print(request.args) # GET
+
+    if request.form.get('pwd') != PASSWORD:
+        return dict(code=1)
+
+    LOGIN = True
+    return dict(code=0)
 
 
 @app.route('/music/<int:id>')
