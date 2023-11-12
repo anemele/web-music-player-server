@@ -1,6 +1,6 @@
 import random
 import socket
-from itertools import chain
+from itertools import chain, starmap
 from pathlib import Path
 
 from flask import Flask, render_template, send_file
@@ -23,8 +23,9 @@ def convert_duration(s: int) -> str:
     return f'{h}:{m:02d}:{s:02d}'
 
 
-def get_music_property(path: Path):
+def get_item(id: int, path: Path):
     tag = TinyTag.get(path).as_dict()
+    tag['id'] = id
     tag['path'] = path
     tag['duration'] = convert_duration(round(tag['duration']))
     if tag['title'] is None:
@@ -33,14 +34,15 @@ def get_music_property(path: Path):
 
 
 _MUSIC_LIST = find_music(Path('D:/Music'), *'*.mp3,*.flac'.split(','))
-ITEMS = list(map(get_music_property, _MUSIC_LIST))
+ITEMS = list(starmap(get_item, enumerate(_MUSIC_LIST)))
 LENGTH = len(ITEMS)
 
 
 @app.route('/')
 def index():
-    random.shuffle(ITEMS)
-    data = dict(items=ITEMS)
+    items = ITEMS.copy()
+    random.shuffle(items)
+    data = dict(items=items)
     return render_template('index.html', **data)
 
 

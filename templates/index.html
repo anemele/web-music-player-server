@@ -7,6 +7,7 @@
     <link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
     <link rel="stylesheet" href="{{url_for('static', filename='css/index.css')}}">
     <script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
+    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
 </head>
 
 <body>
@@ -22,7 +23,7 @@
 
     <div>
         {% for item in items %}
-        <li class="item">
+        <li class="item" id="{{item.id}}">
             <div class="index"><span>{{loop.index-1}}</span>
                 <i></i>
             </div>
@@ -35,42 +36,5 @@
         {% endfor %}
     </div>
 </body>
-
-<script>
-
-    function changeCurrent(item) {
-        $('.current').removeClass('current')
-        $('#current').removeAttr('id')
-        $(item).addClass('current').attr('id', 'current')
-    }
-
-    function locateCurrent() {
-        let current = document.querySelector("#current");
-        if (current !== null) { current.scrollIntoView(true); }
-    }
-
-    const audio = document.querySelector('audio')
-    audio.onended = function () {
-        $.ajax({
-            url: '/random', method: 'GET',
-            success: function (res) {
-                audio.src = '/music/' + res
-                changeCurrent($('.item')[res])
-                locateCurrent()
-            },
-            error: function (err) { if (err) alert(err.message) }
-        })
-    }
-
-    $('.item').each(function (_, item) {
-        $(item, '.content').on('click', function () {
-            let id = $(this).find('.index>span').text()
-            audio.src = '/music/' + id
-            changeCurrent(item)
-        })
-    })
-
-    $('#locate').on('click', locateCurrent)
-</script>
 
 </html>
