@@ -3,51 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{title}}</title>
-    <link rel="shortcut icon" href="{{ url_for('static', filename='./img/favicon.ico') }}">
-    <style>
-        #title,
-        div.player,
-        div.next {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        #next {
-            font-weight: bold;
-            font-size: x-large;
-        }
-    </style>
+    <title>🎧 Music Player 🎵</title>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
+    <link rel="stylesheet" href="{{url_for('static', filename='css/index.css')}}">
     <script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
 </head>
 
 <body>
-    <div>
-        <h2 id="title">{{title}}</h2>
-        <div class="player">
-            <audio src="{{src}}" controls autoplay></audio>
+    <div class="footer">
+        <div>
+            <audio controls autoplay></audio>
         </div>
     </div>
-    <br>
-    <div class="next"><button id="next">next</button></div>
+
+    <div>
+        <button id="locate">+</button>
+    </div>
+
+    <div>
+        {% for item in items %}
+        <li class="item">
+            <div class="index"><span>{{loop.index-1}}</span>
+                <i></i>
+            </div>
+            <div class="content">
+                <div class="name">{{item.title}}</div>
+                <div class="album">{{item.artist}} - {{item.album}}</div>
+            </div>
+            <div class="duration">{{item.duration}}</div>
+        </li>
+        {% endfor %}
+    </div>
 </body>
 
 <script>
+
+    function changeCurrent(item) {
+        $('.current').removeClass('current')
+        $('#current').removeAttr('id')
+        $(item).addClass('current').attr('id', 'current')
+    }
+
+    function locateCurrent() {
+        let current = document.querySelector("#current");
+        if (current !== null) { current.scrollIntoView(true); }
+    }
+
     const audio = document.querySelector('audio')
-    function next() {
+    audio.onended = function () {
         $.ajax({
             url: '/random', method: 'GET',
             success: function (res) {
                 audio.src = '/music/' + res
-                $('head > title').text(res)
-                $('#title').text(res)
+                changeCurrent($('.item')[res])
+                locateCurrent()
             },
-            error: function (err) { alert(err) }
+            error: function (err) { if (err) alert(err.message) }
         })
     }
-    audio.onended = next
-    $('#next').on('click', next)
+
+    $('.item').each(function (_, item) {
+        $(item, '.content').on('click', function () {
+            let id = $(this).find('.index>span').text()
+            audio.src = '/music/' + id
+            changeCurrent(item)
+        })
+    })
+
+    $('#locate').on('click', locateCurrent)
 </script>
 
 </html>

@@ -1,0 +1,84 @@
+li.current {
+    background-color: #dddd;
+}
+
+#locate {
+    font-size: x-large;
+    background-color: #eeee;
+    position: fixed;
+    bottom: 100px;
+    right: 30px;
+    z-index: 999;
+    border-radius: 50%;
+}
+
+audio {
+    position: fixed;
+    bottom: 10px;
+    z-index: 999;
+    margin: auto;
+    left: 0;
+    right: 0;
+}
+
+li.item {
+    position: relative;
+    display: flex;
+    height: 50px;
+    align-items: center;
+    color: #999
+}
+
+.index {
+    width: 50px;
+    font-size: 16px;
+    text-align: center
+}
+
+.index>i {
+    position: absolute;
+    top: 0;
+    left: 12px;
+    font-size: 20px;
+    line-height: 50px;
+    color: red
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+    width: 100%;
+    height: 100%;
+    box-shadow: 0 1px 1px -1px #ccc
+}
+
+.name {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    max-width: calc(100% - 80px);
+    font-size: 15px;
+    color: #000;
+    margin-bottom: 4px
+}
+
+.album {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    max-width: calc(100% - 80px);
+    font-size: 11px
+}
+
+.duration {
+    position: absolute;
+    font-size: 13px;
+    top: 0;
+    right: 0;
+    width: 80px;
+    height: 100%;
+    line-height: 55px;
+    text-align: center;
+}

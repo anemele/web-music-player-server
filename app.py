@@ -4,35 +4,56 @@ from itertools import chain
 from pathlib import Path
 
 from flask import Flask, render_template, send_file
+from tinytag import TinyTag
 
 app = Flask(__name__)
 
-root = Path('D:/Music')
-music_list = [
-    music.name
-    for music in chain.from_iterable(map(root.glob, '*.mp3,*.flac'.split(',')))
-]
+
+def find_music(root: Path, *ext):
+    return (
+        music for music in chain.from_iterable(map(root.glob, ext)) if music.is_file()
+    )
 
 
-def rand_music():
-    return random.choice(music_list)
+def convert_duration(s: int) -> str:
+    m, s = divmod(s, 60)
+    if m < 60:
+        return f'{m}:{s:02d}'
+    h, m = divmod(m, 60)
+    return f'{h}:{m:02d}:{s:02d}'
+
+
+def get_music_property(path: Path):
+    tag = TinyTag.get(path).as_dict()
+    tag['path'] = path
+    tag['duration'] = convert_duration(round(tag['duration']))
+    if tag['title'] is None:
+        tag['title'] = path.name
+    return tag
+
+
+_MUSIC_LIST = find_music(Path('D:/Music'), *'*.mp3,*.flac'.split(','))
+ITEMS = list(map(get_music_property, _MUSIC_LIST))
+LENGTH = len(ITEMS)
 
 
 @app.route('/')
 def index():
-    title = rand_music()
-    data = dict(title=title, src=f'/music/{title}')
+    random.shuffle(ITEMS)
+    data = dict(items=ITEMS)
     return render_template('index.html', **data)
+
+
+@app.route('/music/<int:id>')
+def get_music(id: int):
+    if 0 <= id < LENGTH:
+        return send_file(ITEMS[id]['path'])
+    return render_template('404.html')
 
 
 @app.route('/random')
 def get_random():
-    return rand_music()
-
-
-@app.route('/music/<music>')
-def get_music(music: str):
-    return send_file(root / music)
+    return str(random.randrange(LENGTH))
 
 
 if __name__ == '__main__':
