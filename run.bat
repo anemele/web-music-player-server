@@ -1,1 +1,1 @@
-@%PYTHON_VENV_PATH%\flask\Scripts\python.exe app.py
+@.\.venv\Scripts\python.exe -m player
