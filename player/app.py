@@ -1,20 +1,14 @@
 import random
 from functools import wraps
-from pathlib import Path
 
 from flask import Flask, jsonify, redirect, render_template, request, send_file, session
 
 from .jobs import ITEMS, LENGTH
+from .pwd import PASSWORD
 
 app = Flask(__name__)
 
 app.secret_key = '789hdhfijbjnb4868ghjvh'
-
-_PWD_PATH = Path('./pwd.txt')
-if _PWD_PATH.exists():
-    PASSWORD = _PWD_PATH.read_text().strip()
-else:
-    PASSWORD = None
 
 
 def require_login(func):
@@ -68,10 +62,7 @@ def get_music(id: int):
 
 
 def main():
-    import socket
-
-    host = socket.gethostbyname(socket.gethostname())
-    app.run(host=host, debug=True)
+    app.run(host='0.0.0.0', port=80, debug=True)
 
 
 if __name__ == '__main__':
