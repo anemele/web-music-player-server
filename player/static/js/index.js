@@ -9,27 +9,33 @@ function locateCurrent() {
     if (current !== null) { current.scrollIntoView(true); }
 }
 
+function randrange(max) {
+    return Math.floor(Math.random() * max);
+}
+
 $(document).ready(function () {
     const audio = document.querySelector('audio')
-    audio.onended = function () {
-        $.ajax({
-            url: '/random', method: 'GET',
-            success: function (res) {
-                audio.src = '/music/' + res
-                changeCurrent($(`.item[uid=${res}]`))
-                locateCurrent()
-            },
-            error: function (err) { if (err) alert(err) }
-        })
+
+    function play(id) {
+        audio.src = '/music/' + id
+        if (audio.paused) { audio.paused = false; audio.play() }
     }
+
+    function next() {
+        let id = randrange($('li.item').length)
+        play(id)
+        changeCurrent($(`.item[uid=${id}]`))
+        locateCurrent()
+    }
+
+    audio.onended = next
 
     $('.item').each(function (_, item) {
         $(item, '.content').on('click', function () {
             if ($(this).attr('id') === 'current') { return }
             let id = $(this).attr('uid')
-            audio.src = '/music/' + id
+            play(id)
             changeCurrent(item)
-            if (audio.paused) { audio.paused = false; audio.play() }
         })
     })
 

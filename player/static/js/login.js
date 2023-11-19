@@ -13,8 +13,8 @@ $(document).ready(function () {
                 method: 'POST',
                 data: { pwd },
                 success: function (res) {
-                    if (res.code == 0) { window.location.pathname = '/' }
-                    else { alert('密码错误') }
+                    if (res.code == 0) { window.location.pathname = '/music' }
+                    else { alert(res.msg) }
                 }
             })
         }

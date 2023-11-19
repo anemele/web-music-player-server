@@ -1,60 +1,70 @@
 import random
+from functools import wraps
 from pathlib import Path
 
-from flask import Flask, redirect, render_template, request, send_file
+from flask import Flask, jsonify, redirect, render_template, request, send_file, session
 
 from .jobs import ITEMS, LENGTH
 
 app = Flask(__name__)
 
-LOGIN: bool = False
-PASSWORD = None
+app.secret_key = '789hdhfijbjnb4868ghjvh'
+
 _PWD_PATH = Path('./pwd.txt')
 if _PWD_PATH.exists():
     PASSWORD = _PWD_PATH.read_text().strip()
+else:
+    PASSWORD = None
+
+
+def require_login(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if session.get('state') != 'login':
+            return redirect('/login')
+        return func(*args, **kwargs)
+
+    return wrapper
 
 
 @app.route('/')
+@require_login
 def index():
-    global LOGIN
-    if PASSWORD is not None and not LOGIN:
-        return redirect('/login')
-    LOGIN = False
+    return redirect('/music')
 
+
+@app.get('/music')
+@require_login
+def get_music_page():
     items = ITEMS.copy()
     random.shuffle(items)
     data = dict(items=items)
     return render_template('index.html', **data)
 
 
-@app.route('/login')
+@app.get('/login')
 def get_login():
     return render_template('login.html')
 
 
-@app.route('/login', methods=['POST'])
+@app.post('/login')
 def post_login():
-    global LOGIN
     # print(request.form) # POST
     # print(request.args) # GET
 
     if request.form.get('pwd') != PASSWORD:
-        return dict(code=1)
+        return jsonify(code=1, msg="ERROR_PASSWORD")
 
-    LOGIN = True
-    return dict(code=0)
+    session['state'] = 'login'
+    return jsonify(code=0)
 
 
 @app.route('/music/<int:id>')
+@require_login
 def get_music(id: int):
     if 0 <= id < LENGTH:
         return send_file(ITEMS[id]['path'])  # type: ignore
     return render_template('404.html')
-
-
-@app.route('/random')
-def get_random():
-    return str(ITEMS[random.randrange(LENGTH)]['id'])
 
 
 def main():
