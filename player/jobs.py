@@ -1,14 +1,17 @@
 import json
+import time
 from itertools import chain, starmap
 from pathlib import Path
-from turtle import title
+from typing import Iterable
 
 from tinytag import TinyTag
 
 
-def find_music(root: Path, *ext):
+def find_music(root: Path, patterns: Iterable[str]):
     return (
-        music for music in chain.from_iterable(map(root.glob, ext)) if music.is_file()
+        music
+        for music in chain.from_iterable(map(root.glob, patterns))
+        if music.is_file()
     )
 
 
@@ -27,19 +30,29 @@ def get_item(id: int, path: Path):
         id=id,
         path=str(path),
         duration=convert_duration(round(tag['duration'])),
-        title=tag.get('title', path.name),
-        artist=tag['artist'],
-        album=tag['album'],
+        title=tag['title'] or path.name,
+        artist=tag['artist'] or '',
+        album=tag['album'] or '',
     )
 
 
+def is_expired(path: Path):
+    return float(path.read_text().strip()) < time.time()
+
+
+_EXPIRE = Path('expire.txt')
+_EXPIRE_TIME = 60 * 60 * 24 * 7
 _STORE = Path('music.json')
-if _STORE.exists():
+
+if _EXPIRE.exists() and not is_expired(_EXPIRE) and _STORE.exists():
     ITEMS = json.loads(_STORE.read_bytes())
 else:
-    _MUSIC_LIST = find_music(Path('D:/Music'), *'*.mp3,*.flac'.split(','))
+    _MUSIC_LIST = find_music(Path('D:/Music'), '*.mp3,*.flac'.split(','))
     ITEMS = list(starmap(get_item, enumerate(_MUSIC_LIST)))
 
     with open(_STORE, 'w', encoding='utf-8') as fp:
         json.dump(ITEMS, fp, ensure_ascii=False)
+
+    _EXPIRE.write_text(str(time.time() + _EXPIRE_TIME))
+
 LENGTH = len(ITEMS)

@@ -40,4 +40,5 @@ $(document).ready(function () {
     })
 
     $('#locate').on('click', locateCurrent)
+    $('#next').on('click', next)
 })
