@@ -3,6 +3,8 @@ from functools import wraps
 
 from flask import Flask, redirect, render_template, send_file
 
+from . import DEBUG
+from .cache import CACHE_PATH
 from .jobs import ITEMS, LENGTH
 
 app = Flask(__name__)
@@ -57,3 +59,25 @@ def get_music(id: int):
     if 0 <= id < LENGTH:
         return send_file(ITEMS[id].path)
     return render_template('404.html')
+
+
+PORT = 80
+
+
+def main():
+    if DEBUG:
+        host = 'localhost'
+    else:
+        import socket
+        import subprocess
+
+        import qrcode
+
+        host = socket.gethostbyname(socket.gethostname())
+        tmp = CACHE_PATH.joinpath('qrcode.png')
+
+        qrcode.make(host).save(str(tmp))
+        print(tmp)
+        subprocess.run(f'start {tmp}', shell=True)
+
+    app.run(host=host, port=PORT, debug=DEBUG)

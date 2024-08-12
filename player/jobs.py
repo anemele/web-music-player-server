@@ -8,6 +8,8 @@ from typing import Iterable, List
 from dataclass_binder import Binder
 from tinytag import TinyTag
 
+from .cache import CACHE_PATH
+
 
 def convert_duration(s: int) -> str:
     m, s = divmod(s, 60)
@@ -53,7 +55,7 @@ def find_music(root: Path, patterns: Iterable[str]):
     )
 
 
-_STORE = Path('music.json')
+_STORE = CACHE_PATH.joinpath('music.json')
 _EXPIRE_TIME = 60 * 60 * 24 * 7
 _MUSIC_PATH = Path('D:/Music')
 _MUSIC_PATTERN = '*.mp3,*.flac'.split(',')
