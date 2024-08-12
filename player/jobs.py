@@ -3,17 +3,10 @@ import time
 from dataclasses import asdict, dataclass
 from itertools import chain, starmap
 from pathlib import Path
-from typing import Iterable
+from typing import Iterable, List
 
+from dataclass_binder import Binder
 from tinytag import TinyTag
-
-
-def find_music(root: Path, patterns: Iterable[str]):
-    return (
-        music
-        for music in chain.from_iterable(map(root.glob, patterns))
-        if music.is_file()
-    )
 
 
 def convert_duration(s: int) -> str:
@@ -34,6 +27,12 @@ class MusicItem:
     album: str
 
 
+@dataclass
+class MusicData:
+    music: List[MusicItem]
+    expire: float
+
+
 def get_item(id: int, path: Path) -> MusicItem:
     tag = TinyTag.get(path)
     return MusicItem(
@@ -46,23 +45,36 @@ def get_item(id: int, path: Path) -> MusicItem:
     )
 
 
-def is_expired(path: Path):
-    return float(path.read_text().strip()) < time.time()
+def find_music(root: Path, patterns: Iterable[str]):
+    return (
+        music
+        for music in chain.from_iterable(map(root.glob, patterns))
+        if music.is_file()
+    )
 
 
-_EXPIRE = Path('expire.txt')
-_EXPIRE_TIME = 60 * 60 * 24 * 7
 _STORE = Path('music.json')
+_EXPIRE_TIME = 60 * 60 * 24 * 7
+_MUSIC_PATH = Path('D:/Music')
+_MUSIC_PATTERN = '*.mp3,*.flac'.split(',')
 
-if _EXPIRE.exists() and not is_expired(_EXPIRE) and _STORE.exists():
-    ITEMS = [MusicItem(**kw) for kw in json.loads(_STORE.read_bytes())]
-else:
-    _MUSIC_LIST = find_music(Path('D:/Music'), '*.mp3,*.flac'.split(','))
-    ITEMS = list(starmap(get_item, enumerate(_MUSIC_LIST)))
+_flag = True
+if _STORE.exists():
+    data = Binder(MusicData).bind(json.loads(_STORE.read_bytes()))
+    if data.expire > time.time():
+        ITEMS = data.music
+        _flag = False
+
+if _flag:
+    music_path_list = find_music(_MUSIC_PATH, _MUSIC_PATTERN)
+    ITEMS = list(starmap(get_item, enumerate(music_path_list)))
 
     with open(_STORE, 'w', encoding='utf-8') as fp:
-        json.dump([asdict(it) for it in ITEMS], fp, ensure_ascii=False)
+        json.dump(
+            asdict(MusicData(music=ITEMS, expire=time.time() + _EXPIRE_TIME)),
+            fp,
+            ensure_ascii=False,
+        )
 
-    _EXPIRE.write_text(str(time.time() + _EXPIRE_TIME))
 
 LENGTH = len(ITEMS)
