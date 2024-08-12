@@ -57,11 +57,3 @@ def get_music(id: int):
     if 0 <= id < LENGTH:
         return send_file(ITEMS[id].path)
     return render_template('404.html')
-
-
-def main():
-    app.run(host='0.0.0.0', port=80, debug=True)
-
-
-if __name__ == '__main__':
-    main()
