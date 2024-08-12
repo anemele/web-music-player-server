@@ -1,5 +1,6 @@
 import json
 import time
+from dataclasses import asdict, dataclass
 from itertools import chain, starmap
 from pathlib import Path
 from typing import Iterable
@@ -23,16 +24,25 @@ def convert_duration(s: int) -> str:
     return f'{h}:{m:02d}:{s:02d}'
 
 
-def get_item(id: int, path: Path):
-    tag = TinyTag.get(path).as_dict()
+@dataclass
+class MusicItem:
+    id: int
+    path: str
+    duration: str
+    title: str
+    artist: str
+    album: str
 
-    return dict(
+
+def get_item(id: int, path: Path) -> MusicItem:
+    tag = TinyTag.get(path)
+    return MusicItem(
         id=id,
         path=str(path),
-        duration=convert_duration(round(tag['duration'])),
-        title=tag['title'] or path.name,
-        artist=tag['artist'] or '',
-        album=tag['album'] or '',
+        duration=convert_duration(round(tag.duration)),  # type: ignore
+        title=tag.title or path.name,
+        artist=tag.artist or '',
+        album=tag.album or '',
     )
 
 
@@ -45,13 +55,13 @@ _EXPIRE_TIME = 60 * 60 * 24 * 7
 _STORE = Path('music.json')
 
 if _EXPIRE.exists() and not is_expired(_EXPIRE) and _STORE.exists():
-    ITEMS = json.loads(_STORE.read_bytes())
+    ITEMS = [MusicItem(**kw) for kw in json.loads(_STORE.read_bytes())]
 else:
     _MUSIC_LIST = find_music(Path('D:/Music'), '*.mp3,*.flac'.split(','))
     ITEMS = list(starmap(get_item, enumerate(_MUSIC_LIST)))
 
     with open(_STORE, 'w', encoding='utf-8') as fp:
-        json.dump(ITEMS, fp, ensure_ascii=False)
+        json.dump([asdict(it) for it in ITEMS], fp, ensure_ascii=False)
 
     _EXPIRE.write_text(str(time.time() + _EXPIRE_TIME))
 
