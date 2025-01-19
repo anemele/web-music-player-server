@@ -1,1 +1,1 @@
-@.\.venv\Scripts\python.exe -m player
+@%~dp0.venv\Scripts\python.exe -m music_player

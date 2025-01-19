@@ -14,9 +14,9 @@ from .cache import CACHE_PATH
 def convert_duration(s: int) -> str:
     m, s = divmod(s, 60)
     if m < 60:
-        return f'{m}:{s:02d}'
+        return f"{m}:{s:02d}"
     h, m = divmod(m, 60)
-    return f'{h}:{m:02d}:{s:02d}'
+    return f"{h}:{m:02d}:{s:02d}"
 
 
 @dataclass
@@ -42,8 +42,8 @@ def get_item(id: int, path: Path) -> MusicItem:
         path=str(path),
         duration=convert_duration(round(tag.duration)),  # type: ignore
         title=tag.title or path.name,
-        artist=tag.artist or '',
-        album=tag.album or '',
+        artist=tag.artist or "",
+        album=tag.album or "",
     )
 
 
@@ -55,10 +55,10 @@ def find_music(root: Path, patterns: Iterable[str]):
     )
 
 
-_STORE = CACHE_PATH.joinpath('music.json')
+_STORE = CACHE_PATH.joinpath("music.json")
 _EXPIRE_TIME = 60 * 60 * 24 * 7
-_MUSIC_PATH = Path('D:/Music')
-_MUSIC_PATTERN = '*.mp3,*.flac'.split(',')
+_MUSIC_PATH = Path("D:/Music")
+_MUSIC_PATTERN = "*.mp3,*.flac".split(",")
 
 _flag = True
 if _STORE.exists():
@@ -71,7 +71,7 @@ if _flag:
     music_path_list = find_music(_MUSIC_PATH, _MUSIC_PATTERN)
     ITEMS = list(starmap(get_item, enumerate(music_path_list)))
 
-    with open(_STORE, 'w', encoding='utf-8') as fp:
+    with open(_STORE, "w", encoding="utf-8") as fp:
         json.dump(
             asdict(MusicData(music=ITEMS, expire=time.time() + _EXPIRE_TIME)),
             fp,

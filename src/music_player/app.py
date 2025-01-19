@@ -1,15 +1,15 @@
+import os
 import random
 from functools import wraps
 
 from flask import Flask, redirect, render_template, send_file
 
-from . import DEBUG
 from .cache import CACHE_PATH
 from .jobs import ITEMS, LENGTH
 
 app = Flask(__name__)
 
-app.secret_key = '789hdhfijbjnb4868ghjvh'
+app.secret_key = "789hdhfijbjnb4868ghjvh"
 
 
 def require_login(func):
@@ -22,18 +22,18 @@ def require_login(func):
     return wrapper
 
 
-@app.route('/')
+@app.route("/")
 @require_login
 def index():
-    return redirect('/music')
+    return redirect("/music")
 
 
-@app.get('/music')
+@app.get("/music")
 @require_login
 def get_music_page():
     items = ITEMS.copy()
     random.shuffle(items)
-    return render_template('index.html', items=items)
+    return render_template("index.html", items=items)
 
 
 # @app.get('/login')
@@ -53,20 +53,22 @@ def get_music_page():
 #     return jsonify(code=0)
 
 
-@app.route('/music/<int:id>')
+@app.route("/music/<int:id>")
 @require_login
 def get_music(id: int):
     if 0 <= id < LENGTH:
         return send_file(ITEMS[id].path)
-    return render_template('404.html')
+    return render_template("404.html")
 
 
 PORT = 80
 
 
 def main():
+    DEBUG = bool(os.getenv("DEBUG"))
+
     if DEBUG:
-        host = 'localhost'
+        host = "localhost"
     else:
         import socket
         import subprocess
@@ -74,10 +76,11 @@ def main():
         import qrcode
 
         host = socket.gethostbyname(socket.gethostname())
-        tmp = CACHE_PATH.joinpath('qrcode.png')
+        tmp = CACHE_PATH.joinpath("qrcode.png")
 
-        qrcode.make(host).save(str(tmp))
-        print(tmp)
-        subprocess.run(f'start {tmp}', shell=True)
+        with open(tmp, "wb") as f:
+            qrcode.make(host).save(f)
+
+        subprocess.run(f"start {tmp}", shell=True)
 
     app.run(host=host, port=PORT, debug=DEBUG)
