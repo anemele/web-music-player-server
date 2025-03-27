@@ -1,1 +1,5 @@
-@%~dp0.venv\Scripts\python.exe -m music_player
+@echo off
+
+pushd %~dp0
+call .venv\Scripts\python.exe -m music_player
+popd

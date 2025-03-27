@@ -1,86 +1,28 @@
-import os
-import random
-from functools import wraps
+from flask import Flask, send_file
 
-from flask import Flask, redirect, render_template, send_file
+from .core import load_data
 
-from .cache import CACHE_PATH
-from .jobs import ITEMS, LENGTH
+item_list, id_path_map, server_config = load_data()
+legnth = len(id_path_map)
 
 app = Flask(__name__)
 
 app.secret_key = "789hdhfijbjnb4868ghjvh"
 
 
-def require_login(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        # if session.get('state') != 'login':
-        #     return redirect('/login')
-        return func(*args, **kwargs)
-
-    return wrapper
+@app.route("/api/list")
+def get_music_list():
+    return item_list
 
 
-@app.route("/")
-@require_login
-def index():
-    return redirect("/music")
-
-
-@app.get("/music")
-@require_login
-def get_music_page():
-    items = ITEMS.copy()
-    random.shuffle(items)
-    return render_template("index.html", items=items)
-
-
-# @app.get('/login')
-# def get_login():
-#     return render_template('login.html')
-
-
-# @app.post('/login')
-# def post_login():
-#     # print(request.form) # POST
-#     # print(request.args) # GET
-
-#     if request.form.get('pwd') != PASSWORD:
-#         return jsonify(code=1, msg="ERROR_PASSWORD")
-
-#     session['state'] = 'login'
-#     return jsonify(code=0)
-
-
-@app.route("/music/<int:id>")
-@require_login
-def get_music(id: int):
-    if 0 <= id < LENGTH:
-        return send_file(ITEMS[id].path)
-    return render_template("404.html")
-
-
-PORT = 80
+@app.route("/api/music/<int:id>")
+def get_music_file(id: int):
+    return send_file(id_path_map[id])
 
 
 def main():
-    DEBUG = bool(os.getenv("DEBUG"))
-
-    if DEBUG:
-        host = "localhost"
-    else:
-        import socket
-        import subprocess
-
-        import qrcode
-
-        host = socket.gethostbyname(socket.gethostname())
-        tmp = CACHE_PATH.joinpath("qrcode.png")
-
-        with open(tmp, "wb") as f:
-            qrcode.make(host).save(f)
-
-        subprocess.run(f"start {tmp}", shell=True)
-
-    app.run(host=host, port=PORT, debug=DEBUG)
+    app.run(
+        debug=server_config.debug,
+        host=server_config.host,
+        port=server_config.port,
+    )
