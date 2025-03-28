@@ -1,4 +1,5 @@
 from flask import Flask, send_file
+from flask_cors import CORS
 
 from .core import load_data
 
@@ -6,6 +7,7 @@ item_list, id_path_map, server_config = load_data()
 legnth = len(id_path_map)
 
 app = Flask(__name__)
+CORS(app)
 
 app.secret_key = "789hdhfijbjnb4868ghjvh"
 
