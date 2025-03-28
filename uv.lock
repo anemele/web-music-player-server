@@ -162,7 +162,7 @@ toml = [
 ]
 
 [[package]]
-name = "music-player"
+name = "music-player-server"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [

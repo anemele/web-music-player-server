@@ -28,3 +28,7 @@ def main():
         host=server_config.host,
         port=server_config.port,
     )
+
+
+if __name__ == "__main__":
+    main()

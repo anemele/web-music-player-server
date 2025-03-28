@@ -1,5 +1,5 @@
 [project]
-name = "music-player"
+name = "music-player-server"
 version = "0.1.0"
 description = "Web-based music player"
 readme = "README.md"
@@ -13,7 +13,7 @@ dependencies = [
 ]
 
 [project.scripts]
-music-player = "music_player.app:main"
+music-player-server = "music_player_server.app:main"
 
 [build-system]
 requires = ["hatchling"]
