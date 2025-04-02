@@ -1,7 +1,7 @@
 [project]
-name = "music-player-server"
+name = "web-music-player"
 version = "0.1.0"
-description = "Web-based music player"
+description = "server"
 readme = "README.md"
 authors = [{ name = "Jason Swift", email = "anemele@outlook.com" }]
 requires-python = ">=3.10"
@@ -13,7 +13,7 @@ dependencies = [
 ]
 
 [project.scripts]
-music-player-server = "music_player_server.app:main"
+web-music-player-server = "web_music_player.app:main"
 
 [build-system]
 requires = ["hatchling"]
