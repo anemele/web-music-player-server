@@ -91,7 +91,7 @@ def load_data() -> EXPORT_TYPE | None:
 
     # 3. 缓存不存在或已过期，重新生成数据
     if not MUSIC_PATH_FILE.exists():
-        print(f"未找到音乐目录，请在配置文件中指定：{MUSIC_PATH_FILE}")
+        print(f"please set music path in \"{MUSIC_PATH_FILE}\"")
         return None
 
     music_path = MUSIC_PATH_FILE.read_text().strip()
