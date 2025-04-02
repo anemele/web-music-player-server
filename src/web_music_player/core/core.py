@@ -5,32 +5,12 @@ from pathlib import Path
 from typing import Iterable
 
 from mashumaro.mixins.orjson import DataClassORJSONMixin
-from mashumaro.mixins.toml import DataClassTOMLMixin
 from tinytag import TinyTag
-
 
 LOCAL_DIR = Path(".local")
 LOCAL_DIR.mkdir(exist_ok=True)
 if not (gi := LOCAL_DIR / ".gitignore").exists():
     gi.write_text("*")
-
-
-# 服务器配置清单
-@dataclass
-class ServerConfig(DataClassTOMLMixin):
-    fs_root: Path
-    host: str = "localhost"
-    port: int = 5000
-    debug: bool = True
-
-
-# 服务器配置文件
-SERVER_CONFIG_FILE = LOCAL_DIR / "server.config.toml"
-
-
-# 服务器配置
-def load_server_config():
-    return ServerConfig.from_toml(SERVER_CONFIG_FILE.read_text())
 
 
 # 音乐数据（tag）
@@ -60,7 +40,7 @@ class MusicDataCache(DataClassORJSONMixin):
     expire: float
 
 
-EXPIRE_TIME = 60 * 60 * 24 * 7
+EXPIRE_TIME = 60 * 60 * 24 * 7  # 7天过期
 CACHE_FILE = LOCAL_DIR / "music.json"
 
 
@@ -92,11 +72,11 @@ def find_music(
     )
 
 
-EXPORT_TYPE = tuple[list[MusicItem], list[Path], ServerConfig]
+MUSIC_PATH_FILE = LOCAL_DIR / "music.path"
+EXPORT_TYPE = tuple[list[MusicItem], list[Path]]
 
 
-def load_data() -> EXPORT_TYPE:
-    server_config = load_server_config()
+def load_data() -> EXPORT_TYPE | None:
     # 1. 从缓存中加载数据
     if CACHE_FILE.exists():
         data = MusicDataCache.from_json(CACHE_FILE.read_bytes())
@@ -107,9 +87,15 @@ def load_data() -> EXPORT_TYPE:
             for i, music in enumerate(data.music):
                 r1.append(music.path)
                 r0.append(MusicItem.from_dict({"id": i, **music.to_dict()}))
-            return r0, r1, server_config
+            return r0, r1
+
     # 3. 缓存不存在或已过期，重新生成数据
-    music_path_list = find_music(server_config.fs_root)
+    if not MUSIC_PATH_FILE.exists():
+        print(f"未找到音乐目录，请在配置文件中指定：{MUSIC_PATH_FILE}")
+        return None
+
+    music_path = MUSIC_PATH_FILE.read_text().strip()
+    music_path_list = find_music(Path(music_path))
     r0 = []
     r1 = []
     cache_data = []
@@ -127,4 +113,4 @@ def load_data() -> EXPORT_TYPE:
     )
     CACHE_FILE.write_bytes(cache.to_jsonb())
 
-    return r0, r1, server_config
+    return r0, r1
