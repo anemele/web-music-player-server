@@ -1,3 +1,5 @@
+import random
+
 from flask import Flask, send_file
 from flask_cors import CORS
 
@@ -9,11 +11,10 @@ legnth = len(id_path_map)
 app = Flask(__name__)
 CORS(app)
 
-app.secret_key = "789hdhfijbjnb4868ghjvh"
-
 
 @app.route("/api/list")
 def get_music_list():
+    random.shuffle(item_list)
     return item_list
 
 
