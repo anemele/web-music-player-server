@@ -19,7 +19,7 @@ class MusicTag(DataClassORJSONMixin):
     title: str
     artist: str
     album: str
-    duration: str
+    duration: float
 
 
 # 音乐数据（网络传输）
@@ -44,18 +44,10 @@ EXPIRE_TIME = 60 * 60 * 24 * 7  # 7天过期
 CACHE_FILE = LOCAL_DIR / "music.json"
 
 
-def convert_duration(s: int) -> str:
-    m, s = divmod(s, 60)
-    if m < 60:
-        return f"{m}:{s:02d}"
-    h, m = divmod(m, 60)
-    return f"{h}:{m:02d}:{s:02d}"
-
-
 def get_tag(path: Path) -> MusicTag:
     tag = TinyTag.get(path)
     return MusicTag(
-        duration=convert_duration(round(tag.duration or 0.0)),
+        duration=tag.duration or 0,
         title=tag.title or path.name,
         artist=tag.artist or "",
         album=tag.album or "",
