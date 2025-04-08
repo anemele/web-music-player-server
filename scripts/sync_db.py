@@ -39,17 +39,19 @@ def sync_db(path_fs: set[Path], path_db: set[Path]):
     to_post = path_fs - path_db
     to_delete = path_db - path_fs
 
+    print(f"{len(to_post)} to post")
     for path in to_post:
-        print(f"to post {path}")
         sess.post(url, json=read_music(path))
+        print(f"posted {path}")
 
+    print(f"{len(to_delete)} to delete")
     for path in to_delete:
         if path.exists():
             continue
         # Here requires the `id` field
         # f"{url}/{id}"
-        print(f"to delete {path}")
         # sess.delete(url)
+        print(f"deleted {path}")
 
 
 def main():
