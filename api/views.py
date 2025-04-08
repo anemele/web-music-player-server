@@ -20,7 +20,11 @@ def music_list(request: Request):
     match request.method:
         case "GET":
             objs = MusicModel.objects.all()
-            serializer = MusicForClientSerializer(objs, many=True)
+            if request.GET.get("server") == "true":
+                ser = MusicForServerSerializer
+            else:
+                ser = MusicForClientSerializer
+            serializer = ser(objs, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         case "POST":
             serializer = MusicForServerSerializer(data=request.data)
