@@ -54,6 +54,12 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+# See https://geek-docs.com/django/django-questions/942_django_django_rest_framework_gives_403_when_behind_nginx_but_not_directly.html
+# solve 403 when reverse proxy by nginx
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [],
+}
+
 ROOT_URLCONF = "web_music_player.urls"
 
 TEMPLATES = [
