@@ -1,3 +1,4 @@
+from collections.abc import Mapping, Set
 from itertools import chain
 from pathlib import Path
 
@@ -5,7 +6,7 @@ import requests
 import tinytag
 
 
-def read_music(path: Path) -> dict[str, str | float]:
+def read_music(path: Path) -> Mapping[str, str | float]:
     tag = tinytag.TinyTag.get(path)
     return {
         "title": tag.title or path.name,
@@ -19,7 +20,7 @@ def read_music(path: Path) -> dict[str, str | float]:
 SUPPORTED_FORMAT = ["*.mp3", "*.flac"]
 
 
-def get_music_files_from_fs(path: Path) -> set[Path]:
+def get_music_files_from_fs(path: Path) -> Set[Path]:
     it = chain.from_iterable(map(path.glob, SUPPORTED_FORMAT))
     return set(it)
 
@@ -29,15 +30,16 @@ url = "http://localhost:8000/api/music/"
 sess = requests.Session()
 
 
-def get_music_files_from_db() -> set[Path]:
+def get_music_files_from_db() -> Mapping[Path, int]:
     res = sess.get(url, params={"server": "true"})
-    server_path_list = {item["path"] for item in res.json()}
-    return set(map(Path, server_path_list))
+    ret = {Path(item["path"]): item["id"] for item in res.json()}
+    return ret
 
 
-def sync_db(path_fs: set[Path], path_db: set[Path]):
-    to_post = path_fs - path_db
-    to_delete = path_db - path_fs
+def sync_db(path_fs: Set[Path], path_db: Mapping[Path, int]):
+    path_db_set = set(path_db)
+    to_post = path_fs - path_db_set
+    to_delete = path_db_set - path_fs
 
     print(f"{len(to_post)} to post")
     for path in to_post:
@@ -48,9 +50,7 @@ def sync_db(path_fs: set[Path], path_db: set[Path]):
     for path in to_delete:
         if path.exists():
             continue
-        # Here requires the `id` field
-        # f"{url}/{id}"
-        # sess.delete(url)
+        sess.delete(f"{url}{path_db[path]}")
         print(f"deleted {path}")
 
 
