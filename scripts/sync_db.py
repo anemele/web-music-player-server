@@ -21,11 +21,12 @@ SUPPORTED_FORMAT = ["*.mp3", "*.flac"]
 
 
 def get_music_files_from_fs(path: Path) -> Set[Path]:
-    it = chain.from_iterable(map(path.glob, SUPPORTED_FORMAT))
+    it = map(path.glob, SUPPORTED_FORMAT)
+    it = chain.from_iterable(it)
     return set(it)
 
 
-url = "http://localhost:8000/api/music/"
+url = "http://127.0.0.1:8000/api/music/"
 
 sess = requests.Session()
 
